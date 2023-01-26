@@ -6,11 +6,12 @@ Computer vision project about visual odometry
 
 ```mermaid
 graph LR;
-    Images-->Conv_Odometry;
-    Images-->Conv_Intertial;
-    Conv_Odometry-->Dense_Odometry;
-    Conv_Intertial-->Sequence_Inertial;
-    Sequence_Inertial-->Dense_Odometry;
+    Images-->Conv2d_Odometry;
+    Images-->Conv2d_Intertial;
+    Conv2d_Odometry-->Dense_Odometry;
+    Conv2d_Intertial-->Conv1d_Inertial;
+    Inertial_Sequence-->Conv1d_Inertial;
+    Conv1d_Inertial-->Dense_Odometry;
     Dense_Odometry-->Odometry;
 ```
 
