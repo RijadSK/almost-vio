@@ -19,6 +19,10 @@ graph LR;
 
 source: https://github.com/AaltoVision/ADVIO (francesco)
 
+## Utils
+
+- **video_to_frame.py**: it's a script to extract the frames from the video in order to prepare the data
+
 # Reference
 
 - http://mrsl.grasp.upenn.edu/loiannog/tutorial_ICRA2016/VO_Tutorial.pdf (Blandinie)
