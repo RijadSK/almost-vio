@@ -12,7 +12,6 @@ filename = path + "frames"+ file_extension
 vid = cv2.VideoCapture(filename)
 fps = vid.get(cv2.CAP_PROP_FPS)
 frame_count = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
-count = 0
 
 print(f"\nExtracting {filename} ...\n")
 while vid.isOpened():
@@ -23,11 +22,10 @@ while vid.isOpened():
           os.mkdir(path+"frames/")
       
       try:
-        cv2.imwrite(path+"frames/"+f"frame_{count:05}.jpg", frame)
+        cv2.imwrite(path+"frames/"+f"frame_{i:05}.jpg", frame)
       except Exception as e:
-        pass
+        break
 
-      count = count + 1
       if cv2.waitKey(10) & 0xFF == ord('q'):
           break
 
