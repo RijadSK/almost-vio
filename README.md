@@ -17,8 +17,6 @@ graph LR;
 
 # Dataset
 
-The data are 'corridor 1' of 'Euroc / DSO 512x512 dataset' from: https://vision.in.tum.de/data/datasets/visual-inertial-dataset (francesco)
-
 source: https://github.com/AaltoVision/ADVIO (francesco)
 
 # Reference
