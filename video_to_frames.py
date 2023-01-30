@@ -35,6 +35,8 @@ if vid.isOpened():
 
 end_time = time.time()
 elapsed_time = end_time - start_time
-print(f'\nIt took {elapsed_time}s to extract {frame_count/fps}s of video')
-print(f"Done, check the images at {path+'frames'}")
+
+print(f'\nIt took {elapsed_time/60:0.0m}min the video')
+print(f"Check the images at {path+'frames'}")
+
 vid.release()
