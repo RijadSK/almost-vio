@@ -1,7 +1,10 @@
+"""
+Script for the extraction of the frames from the video of the ADVIO dataset
+"""
+
 import cv2
 import os
 import time
-from tqdm import tqdm
 
 start_time = time.time()
 
