@@ -13,6 +13,11 @@ graph LR;
     Inertial_Sequence-->Conv1d_Inertial;
     Conv1d_Inertial-->Dense_Odometry;
     Dense_Odometry-->Odometry;
+
+    style Conv2d_Odometry fill:#00ffaa;
+    style Conv1d_Inertial fill:#00ffaa;
+    style Dense_Odometry fill:#00ffaa;
+    style Conv2d_Intertial fill:#00ffaa;
 ```
 
 # Dataset
