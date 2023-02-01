@@ -5,26 +5,28 @@ and the timestap of the ADVIO dataset.
 import pandas as pd
 import numpy as np
 import os
+from tqdm import tqdm
 
 input_file = "./data/advio-01/iphone/frames.csv"
-output_file = "./data/advio-01/iphone/frames_synced.csv"
+output_file = "./data/advio-01/iphone/frames_sanitize.csv"
 path_frames = "./data/advio-01/iphone/frames"
 
-print("Syncing...")
+print("Sanitizing...")
 
-df = pd.read_csv(input_file)
+df = pd.read_csv(input_file, header=None)
 list_dir = os.listdir(path_frames)
-list_dir = np.sort(np.array(list_dir))
+list_dir = np.array(list_dir)
 
-length = df.shape[0] if df.shape[0] < list_dir.shape[0] else list_dir.shape[0]
-list_dir = list_dir[:length]
-list_dir = list_dir.reshape(-1, 1)
-df = df.to_numpy()
-print(df[:2])
-print(list_dir[:2])
-df = np.concatenate([df, list_dir], axis=1)
-df = pd.DataFrame(df)
+frames = df.iloc[:, 1].to_numpy()
 
+for i in tqdm(frames):
+  if not np.any(list_dir == f"{i}.jpg"):
+
+    # drop frames not present
+    index_to_drop = df[df.iloc[:,1] == i].index[0]
+    df = df.drop([index_to_drop], axis=0)
+
+# saving sanitized df
 df.to_csv(output_file, index=False)
 
-print("Synced")
+print("Done!")
