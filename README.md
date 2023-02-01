@@ -21,7 +21,8 @@ source: https://github.com/AaltoVision/ADVIO (francesco)
 
 ## Utils
 
-- **video_to_frame.py**: it's a script to extract the frames from the video in order to prepare the data
+- **video_to_frame.py**: it extracts the frames from the video in order to prepare the data
+- **sanitize_labels.py**: it checks if the frames extrated by _video_to_frame.py_ are present in the labels(frames.csv) in order to have coherent frames and labels
 
 # Reference
 
