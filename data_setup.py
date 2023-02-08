@@ -9,26 +9,31 @@ from tqdm import tqdm
 from matplotlib import pyplot as plt
 
 def resampling(sample: np.ndarray, frq_new:int) -> np.ndarray:
+    print(f"\tResampling at {frq_new}Hz")
+    
     time_unit = 1/frq_new
     resampled = []
 
     old_time = 0
     current_time = old_time + time_unit
 
-    for idx, s in enumerate(sample):
+    for idx, s in tqdm(enumerate(sample)):
         if current_time < s and idx != 0:
-            # memorizzo il frame piu vicino tra il min e il max
+            # memorizing the closest frame between the previous or the next
             if abs(sample[idx-1] - current_time) < abs(sample[idx] - current_time):
               resampled.append(sample[idx-1] )
             else:
               resampled.append(sample[idx])
                 
             current_time += time_unit
+
+    resampled = np.array(resampled)
     
-    return np.array(resampled)
+    print(f"\tDone! ({resampled.shape})")
+    return resampled
 
 input_file = "./data/advio-01/iphone/frames.csv"
-output_file = "./data/advio-01/iphone/frames_sanitize.csv"
+output_file = "./data/advio-01/iphone/frames_cleaned.csv"
 path_frames = "./data/advio-01/iphone/frames"
 
 print("Set up...")
@@ -49,9 +54,9 @@ frames = frames[np.where(np.isin(ts,tsr))]
 frame_names = np.array([f"{f}.jpg" for f in frames])
 
 data = np.stack([tsr, frame_names])
-df = pd.DataFrame(data.T)
+df = pd.DataFrame(data.T, )
 
-# saving sanitized df
-df.to_csv(output_file, index=False)
+# saving df
+df.to_csv(output_file, index=False, header=False)
 
 print("Done!")
