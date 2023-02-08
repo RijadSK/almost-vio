@@ -5,8 +5,6 @@ and the timestap of the ADVIO dataset.
 import pandas as pd
 import numpy as np
 import os
-from tqdm import tqdm
-from matplotlib import pyplot as plt
 
 def resampling(sample: np.ndarray, frq_new:int) -> np.ndarray:
     print(f"\tResampling at {frq_new}Hz")
@@ -17,7 +15,7 @@ def resampling(sample: np.ndarray, frq_new:int) -> np.ndarray:
     old_time = 0
     current_time = old_time + time_unit
 
-    for idx, s in tqdm(enumerate(sample)):
+    for idx, s in enumerate(sample):
         if current_time < s and idx != 0:
             # memorizing the closest frame between the previous or the next
             if abs(sample[idx-1] - current_time) < abs(sample[idx] - current_time):
@@ -29,7 +27,7 @@ def resampling(sample: np.ndarray, frq_new:int) -> np.ndarray:
 
     resampled = np.array(resampled)
     
-    print(f"\tDone! ({resampled.shape})")
+    print(f"\tDone! {resampled.shape}")
     return resampled
 
 input_file = "./data/advio-01/iphone/frames.csv"
