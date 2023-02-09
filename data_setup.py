@@ -70,8 +70,8 @@ frame_names = np.array([f"{f}.jpg" for f in frames])
 
 # extracting accellerometer data
 print(f"\nExtracting inertial data")
-inertial_data = extract_inertial_data(tsr, df_inertial)
-print(f"Done! {inertial_data.shape}")
+extract_inertial_data(tsr, df_inertial)
+print(f"Done!")
 
 # saving df
 data = np.stack([tsr, frame_names])
@@ -80,4 +80,4 @@ df = pd.DataFrame(
 )
 df.to_csv(output_file, index=False, header=False)
 
-print("Done!")
+print("\nDone!")
