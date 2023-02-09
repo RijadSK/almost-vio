@@ -5,13 +5,11 @@ and the timestap of the ADVIO dataset.
 import pandas as pd
 import numpy as np
 import os
+from tqdm import tqdm
 
-def resampling(sample: np.ndarray, frq_new:int) -> np.ndarray:
-    print(f"\tResampling at {frq_new}Hz")
-    
+def resampling(sample: np.ndarray, frq_new:int) -> np.ndarray:   
     time_unit = 1/frq_new
     resampled = []
-
     old_time = 0
     current_time = old_time + time_unit
 
@@ -24,37 +22,56 @@ def resampling(sample: np.ndarray, frq_new:int) -> np.ndarray:
               resampled.append(sample[idx])
                 
             current_time += time_unit
-
-    resampled = np.array(resampled)
     
-    print(f"\tDone! {resampled.shape}")
-    return resampled
+    return np.array(resampled)
 
-input_file = "./data/advio-01/iphone/frames.csv"
+def extract_inertial_data(sample, df):
+    times_inertials = df.iloc[:, 0].to_numpy()
+    inertials = df.iloc[:, 1:].to_numpy()
+    inertial_data = []
+    
+    for s in tqdm(sample):
+        for idx, t in enumerate(times_inertials):
+            if t < s and idx != 0:
+                # store 2 inertial datapoints for each sample
+                couple_inertials = np.stack([inertials[idx-1], inertials[idx]])
+                inertial_data.append(couple_inertials)
+                    
+    return np.stack(inertial_data)
+
+in_file_frames = "./data/advio-01/iphone/frames.csv"
+in_file_accellerometer = "./data/advio-01/iphone/frames.csv"
 output_file = "./data/advio-01/iphone/frames_cleaned.csv"
 path_frames = "./data/advio-01/iphone/frames"
 
 print("Set up...")
 
-df = pd.read_csv(input_file, header=None)
+df_frames = pd.read_csv(in_file_frames, header=None)
+df_inertial = pd.read_csv(in_file_accellerometer, header=None)
 list_dir = os.listdir(path_frames)
 list_dir = np.array(list_dir)
 
 # timestamps at 60Hz
-ts = df.iloc[:, 0].to_numpy()
+ts = df_frames.iloc[:, 0].to_numpy()
 
 # resampling to 50Hz
+print(f"\nResampling")
 tsr = resampling(ts, 50)
+print(f"Done! {tsr.shape}")
 
 # selecting the frames that matches timestamp
-frames = df.iloc[:, 1].to_numpy()
+frames = df_frames.iloc[:, 1].to_numpy()
 frames = frames[np.where(np.isin(ts,tsr))]
 frame_names = np.array([f"{f}.jpg" for f in frames])
 
-data = np.stack([tsr, frame_names])
-df = pd.DataFrame(data.T, )
+# extracting accellerometer data
+print(f"\nExtracting inertial data")
+inertial_data = extract_inertial_data(tsr, df_inertial)
+print(f"Done! {inertial_data.shape}")
 
 # saving df
+data = np.stack([tsr, frame_names])
+df = pd.DataFrame(data.T, )
 df.to_csv(output_file, index=False, header=False)
 
 print("Done!")
