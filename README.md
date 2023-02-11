@@ -32,13 +32,12 @@ Dataset source: https://github.com/AaltoVision/ADVIO
 
    Each timestamp in the 50Hz sampling is associated with the frame of the closest timestamp of the 60Hz samplig.
 
-3. Sync the timestamp on the accellerometer, gyroscope, video frames and ground truth files
+3. Sync the timestamp on the accellerometer, video frames and ground truth files
 
 ## Utils
 
 - **video_to_frame.py**: it extracts the frames from the video in order to prepare the data
-- **data_setup.py**: resample the video to a lower framerate (50Hz) and couple it with the correct frame
--**convolution.py**: does a convolution of the input image with a kernel, and outputs a square  image of size  224*224
+- **data_setup.py**: resample the video to a lower framerate (50Hz) and couple it with the correct frame -**convolution.py**: does a convolution of the input image with a kernel, and outputs a square image of size 224\*224
 
 # Reference
 
