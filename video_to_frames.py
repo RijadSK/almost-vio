@@ -24,6 +24,8 @@ print(f"""\nExtracting:
 \t{fps} fps
 \t{frame_count} frames\n""")
 
+output_size = (224, 224)
+
 if vid.isOpened():
     for i in range(frame_count):
                     
@@ -33,8 +35,8 @@ if vid.isOpened():
             break
 
           ret,frame = vid.read()
-          
-          cv2.imwrite(path+"frames/"+f"{i}.jpg", frame)
+          resized_frame = cv2.resize(frame, output_size, interpolation = cv2.INTER_AREA)
+          cv2.imwrite(path+"frames/"+f"{i}.jpg", resized_frame)
         except Exception as e:
           print(f"Exception occurred: {e}")
           break
