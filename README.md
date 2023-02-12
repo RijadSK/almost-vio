@@ -26,9 +26,9 @@ Dataset source: https://github.com/AaltoVision/ADVIO
 
 ## Preprocessing
 
-1. Extracting the frames from the video
+1. Extracting and resizing(square shape) the frames from the video.
 
-2. Resample the 60Hz video frames to 50Hz in order to have exactly 2 intertial data(since are sampled at 100Hz) for each frame.
+2. Resample of the 60Hz video frames to 50Hz in order to have exactly 2 intertial data(since are sampled at 100Hz) for each frame.
 
    Each timestamp in the 50Hz sampling is associated with the frame of the closest timestamp of the 60Hz samplig.
 
