@@ -41,19 +41,36 @@ def extract_inertial_data(sample, df):
                 couple_inertials = np.stack([inertials[idx - 1], inertials[idx]])
                 np.save(f"{path}inertials/{s}", couple_inertials)
 
+def sync_poses(sample, df):
+
+    if not os.path.exists(path + "labels/"):
+        os.mkdir(path + "labels/")
+
+    for s in tqdm(sample):
+        for pose_idx in df:
+            if df.iloc[pose_idx, 0] < s and pose_idx != 0:
+                # store 2 inertial datapoints for each sample
+                couple_truth = np.stack([df.iloc[pose_idx-1, 1:4].to_numpy() , df.iloc[pose_idx, 1:4].to_numpy()])
+                np.save(f"{path}labels/{s}", couple_truth)
 
 path = "./data/advio-01/iphone/"
-in_file_frames = "./data/advio-01/iphone/frames.csv"
-in_file_accellerometer = "./data/advio-01/iphone/accelerometer.csv"
-output_file = "./data/advio-01/iphone/frames_cleaned.csv"
+in_frames = "./data/advio-01/iphone/frames.csv"
+in_accellerometer = "./data/advio-01/iphone/accelerometer.csv"
+in_labels = "./data/advio-01/ground-truth/pose.csv"
+
+output_file = "./data/advio-01/iphone/frames_synced.csv"
 path_frames = "./data/advio-01/iphone/frames"
 
-print("Set up...")
 
-df_frames = pd.read_csv(in_file_frames, header=None)
-df_inertial = pd.read_csv(in_file_accellerometer, header=None)
+df_frames = pd.read_csv(in_frames, header=None)
+df_inertial = pd.read_csv(in_accellerometer, header=None)
+df_label = pd.read_csv(in_labels, header=None)
+
 list_dir = os.listdir(path_frames)
 list_dir = np.array(list_dir)
+
+
+print("Set up...")
 
 # timestamps at 60Hz
 ts = df_frames.iloc[:, 0].to_numpy()
@@ -61,7 +78,7 @@ ts = df_frames.iloc[:, 0].to_numpy()
 # resampling to 50Hz
 print(f"\nResampling")
 tsr = resampling(ts, 50)
-print(f"Done! {tsr.shape}")
+print(f"Done - {tsr.shape}")
 
 # selecting the frames that matches timestamp
 frames = df_frames.iloc[:, 1].to_numpy()
@@ -71,7 +88,12 @@ frame_names = np.array([f"{f}.jpg" for f in frames])
 # extracting accellerometer data
 print(f"\nExtracting inertial data")
 extract_inertial_data(tsr, df_inertial)
-print(f"Done!")
+print(f"Done")
+
+# building labels
+print(f"\nBuilding labels")
+sync_poses(tsr, df_label)
+print(f"Done")
 
 # saving df
 data = np.stack([tsr, frame_names])
@@ -80,4 +102,4 @@ df = pd.DataFrame(
 )
 df.to_csv(output_file, index=False, header=False)
 
-print("\nDone!")
+print("\nCompleted!")
