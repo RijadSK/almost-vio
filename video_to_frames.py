@@ -36,6 +36,7 @@ if vid.isOpened():
 
           ret,frame = vid.read()
           resized_frame = cv2.resize(frame, output_size, interpolation = cv2.INTER_AREA)
+
           cv2.imwrite(path+"frames/"+f"{i}.jpg", resized_frame)
         except Exception as e:
           print(f"Exception occurred: {e}")

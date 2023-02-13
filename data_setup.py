@@ -5,6 +5,7 @@ and the timestap of the ADVIO dataset.
 import pandas as pd
 import numpy as np
 import os
+import shutil
 from tqdm import tqdm
 
 
@@ -49,7 +50,7 @@ def sync_poses(sample, df):
     for s in tqdm(sample):
         for pose_idx in df:
             if df.iloc[pose_idx, 0] < s and pose_idx != 0:
-                # store 2 inertial datapoints for each sample
+                # store 2 pose datapoints for each sample
                 couple_truth = np.stack([df.iloc[pose_idx-1, 1:4].to_numpy() , df.iloc[pose_idx, 1:4].to_numpy()])
                 np.save(f"{path}labels/{s}", couple_truth)
 
@@ -95,11 +96,22 @@ print(f"\nBuilding labels")
 sync_poses(tsr, df_label)
 print(f"Done")
 
-# saving df
 data = np.stack([tsr, frame_names])
 df = pd.DataFrame(
     data.T,
 )
+
+for idx, ts in enumerate(tsr):
+    ts = df.iloc[idx,0]
+    frame_name = df.iloc[idx,1]
+
+    frames_path = path + "frames/"
+    current_path = frames_path + f"{ts}/"
+    print(current_path)
+    os.mkdir(current_path)
+    shutil.move(frames_path + frame_name, current_path + frame_name)
+
+# saving df
 df.to_csv(output_file, index=False, header=False)
 
 print("\nCompleted!")
