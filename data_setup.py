@@ -7,7 +7,7 @@ import numpy as np
 import os
 import shutil
 from tqdm import tqdm
-
+from matplotlib.image import imread
 
 def resampling(sample: np.ndarray, frq_new: int) -> np.ndarray:
     time_unit = 1 / frq_new
@@ -113,5 +113,95 @@ for idx, ts in enumerate(tsr):
 
 # saving df
 df.to_csv(output_file, index=False, header=False)
+
+# PACKING DATA AS TENSORS
+
+def normalize(data):
+  data = data - data.min()
+  data = data / data.max()
+  return data
+
+# inertials packing
+print("\nPacking inertials")
+path = "./data/advio-01/iphone/inertials/"
+df = pd.read_csv("./data/advio-01/iphone/frames_synced.csv", header=None, dtype = str)
+files = df.iloc[100:,0].to_numpy()
+full_inertials = False
+
+for file in tqdm(files):
+    inertial = np.load(path + file + ".npy")
+    inertial /= np.array([1, 9.81, 9.81]) # fast patch to not normalized inertials on y and z
+    inertial = inertial.reshape((1,-1,3))
+
+    if type(full_inertials) == bool: 
+        full_inertials = inertial
+    else:
+        full_inertials = np.concatenate([full_inertials, inertial], axis=0) 
+
+np.save("./data/advio-01/iphone/inertials.npy", full_inertials)
+print(full_inertials.shape)
+print("Done")
+
+# labels packing
+print("\nPacking labels")
+
+path = "./data/advio-01/iphone/labels/"
+df = pd.read_csv("./data/advio-01/iphone/frames_synced.csv", header=None, dtype = str)
+files = df.iloc[100:,0].to_numpy()
+full_labels = False
+
+for file in tqdm(files):
+    label = np.load(path + file + ".npy")
+    label = label.reshape((1,-1,3))
+
+    if type(full_labels) == bool: 
+        full_labels = label
+    else:
+        full_labels = np.concatenate([full_labels, label], axis=0) 
+
+np.save("./data/advio-01/iphone/labels.npy", full_labels)
+print(full_labels.shape)
+print("Done")
+
+# image packing
+path = "./data/advio-01/iphone/frames/"
+df = pd.read_csv("./data/advio-01/iphone/frames_synced.csv", header=None)
+files = df.iloc[100:,1].to_numpy()
+full_frames = np.zeros((13002-100, 224, 224, 3)).astype(np.float32)
+
+for idx, file in enumerate(files):
+    frame = imread(path + file)
+    frame = normalize(frame)
+    frame = frame.astype(np.float32)
+
+    full_frames[idx, :, :, :] = frame 
+    del frame
+
+np.save("./data/advio-01/iphone/frames.npy", full_frames)
+print(full_frames.shape)
+print("Done")
+
+# packing buffer
+print("\nPacking inertials")
+path = "./data/advio-01/iphone/inertials/"
+df = pd.read_csv("./data/advio-01/iphone/frames_synced.csv", header=None, dtype = str)
+files = df.iloc[:,0].to_numpy()
+full_inertials = np.zeros((13002-100, 100, 2, 3)).astype(np.float32)
+
+for idx in tqdm(range(100, files.shape[0])):
+
+    inertial_buffer = np.zeros((100, 2, 3)).astype(np.float32)
+    for delta in range(100, 0, -1):
+        inertial = np.load(path + files[idx-delta] + ".npy")
+        inertial /= np.array([1, 9.81, 9.81]) # fast patch to not normalized inertials on y and z
+        inertial_buffer[100-delta, :, :] = inertial
+
+    full_inertials[idx-100, :, :, :] = inertial_buffer
+    del inertial_buffer
+    del inertial
+
+np.save("./data/advio-01/iphone/inertial_buffer.npy", full_inertials)
+print(full_inertials.shape)
+print("Done")
 
 print("\nCompleted!")
