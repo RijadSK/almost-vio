@@ -5,7 +5,7 @@ Computer vision project about visual odometry
 # Pipeline
 
 ```mermaid
-graph LR;
+graph TD;
     Images-->Conv2d_Odometry;
     Images-->Conv2d_Intertial;
     Conv2d_Odometry-->Dense_Odometry;
@@ -14,10 +14,10 @@ graph LR;
     Conv1d_Inertial-->Dense_Odometry;
     Dense_Odometry-->Odometry;
 
-    style Conv2d_Odometry fill:#00ffaa;
-    style Conv1d_Inertial fill:#00ffaa;
-    style Dense_Odometry fill:#00ffaa;
-    style Conv2d_Intertial fill:#00ffaa;
+    style Conv2d_Odometry fill:#FF6600;
+    style Conv1d_Inertial fill:#FF6600;
+    style Dense_Odometry fill:#FF6600;
+    style Conv2d_Intertial fill:#FF6600;
 ```
 
 # Dataset
