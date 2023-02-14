@@ -35,24 +35,34 @@ def extract_inertial_data(sample, df):
     if not os.path.exists(path + "inertials/"):
         os.mkdir(path + "inertials/")
 
-    for s in tqdm(sample):
+    inertial_data = np.zeros((sample[100:].shape[0], 2, 3))
+
+    for sidx, s in enumerate(tqdm(sample[100:])):
         for idx, t in enumerate(times_inertials):
-            if t < s and idx != 0:
+            if t > s and idx != 0:
                 # store 2 inertial datapoints for each sample
-                couple_inertials = np.stack([inertials[idx - 1], inertials[idx]])
-                np.save(f"{path}inertials/{s}", couple_inertials)
+                couple_inertials = np.stack([inertials[idx - 1]/np.array([1, 9.81, 9.81]), inertials[idx]/np.array([1, 9.81, 9.81])])
+                inertial_data[sidx, :, :] = couple_inertials
+                break
+
+    return inertial_data
 
 def sync_poses(sample, df):
 
     if not os.path.exists(path + "labels/"):
         os.mkdir(path + "labels/")
 
-    for s in tqdm(sample):
-        for pose_idx in df:
-            if df.iloc[pose_idx, 0] < s and pose_idx != 0:
+    labels = np.zeros((sample.shape[0], 2, 3))
+
+    for sidx, s in enumerate(tqdm(sample)):
+        for pose_idx, pose in enumerate(df.iloc[:, 0]):
+            if pose > s and pose_idx != 0:
                 # store 2 pose datapoints for each sample
                 couple_truth = np.stack([df.iloc[pose_idx-1, 1:4].to_numpy() , df.iloc[pose_idx, 1:4].to_numpy()])
-                np.save(f"{path}labels/{s}", couple_truth)
+                labels[sidx, :, :] = couple_truth
+                break
+
+    return labels
 
 path = "./data/advio-01/iphone/"
 in_frames = "./data/advio-01/iphone/frames.csv"
@@ -88,12 +98,16 @@ frame_names = np.array([f"{f}.jpg" for f in frames])
 
 # extracting accellerometer data
 print(f"\nExtracting inertial data")
-extract_inertial_data(tsr, df_inertial)
+inertials = extract_inertial_data(tsr, df_inertial)
+np.save(path+"inertials.npy", inertials)
+del inertials
 print(f"Done")
 
 # building labels
 print(f"\nBuilding labels")
-sync_poses(tsr, df_label)
+labels = sync_poses(tsr, df_label)
+np.save(path+"labels.npy", labels)
+del labels
 print(f"Done")
 
 data = np.stack([tsr, frame_names])
@@ -120,48 +134,6 @@ def normalize(data):
   data = data - data.min()
   data = data / data.max()
   return data
-
-# inertials packing
-print("\nPacking inertials")
-path = "./data/advio-01/iphone/inertials/"
-df = pd.read_csv("./data/advio-01/iphone/frames_synced.csv", header=None, dtype = str)
-files = df.iloc[100:,0].to_numpy()
-full_inertials = False
-
-for file in tqdm(files):
-    inertial = np.load(path + file + ".npy")
-    inertial /= np.array([1, 9.81, 9.81]) # fast patch to not normalized inertials on y and z
-    inertial = inertial.reshape((1,-1,3))
-
-    if type(full_inertials) == bool: 
-        full_inertials = inertial
-    else:
-        full_inertials = np.concatenate([full_inertials, inertial], axis=0) 
-
-np.save("./data/advio-01/iphone/inertials.npy", full_inertials)
-print(full_inertials.shape)
-print("Done")
-
-# labels packing
-print("\nPacking labels")
-
-path = "./data/advio-01/iphone/labels/"
-df = pd.read_csv("./data/advio-01/iphone/frames_synced.csv", header=None, dtype = str)
-files = df.iloc[100:,0].to_numpy()
-full_labels = False
-
-for file in tqdm(files):
-    label = np.load(path + file + ".npy")
-    label = label.reshape((1,-1,3))
-
-    if type(full_labels) == bool: 
-        full_labels = label
-    else:
-        full_labels = np.concatenate([full_labels, label], axis=0) 
-
-np.save("./data/advio-01/iphone/labels.npy", full_labels)
-print(full_labels.shape)
-print("Done")
 
 # image packing
 path = "./data/advio-01/iphone/frames/"
