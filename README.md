@@ -14,10 +14,10 @@ graph TD;
     Conv1d_Inertial-->Dense_Odometry;
     Dense_Odometry-->Odometry;
 
-    style Conv2d_Odometry fill:#FF6600;
-    style Conv1d_Inertial fill:#FF6600;
-    style Dense_Odometry fill:#FF6600;
-    style Conv2d_Intertial fill:#FF6600;
+    style Conv2d_Odometry fill:#FF9966;
+    style Conv1d_Inertial fill:#FF9966;
+    style Dense_Odometry fill:#FF9966;
+    style Conv2d_Intertial fill:#FF9966;
 ```
 
 # Dataset
