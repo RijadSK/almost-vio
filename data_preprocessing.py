@@ -1,6 +1,6 @@
 """
 Script for the syncing of the extracted frames (given by video_to_frames.py) 
-and the timestap of the ADVIO dataset.
+and the timestap of the ADVIO dataset (download link present in README.md).
 """
 import pandas as pd
 import numpy as np
@@ -187,7 +187,6 @@ for idx in tqdm(range(100, files.shape[0])):
 
     full_inertials[idx - 100, :, :, :] = inertial_buffer
     del inertial_buffer
-    del inertial
 
 np.save("./data/advio-01/iphone/inertial_buffer.npy", full_inertials)
 print(full_inertials.shape)
