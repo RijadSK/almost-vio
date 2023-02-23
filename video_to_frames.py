@@ -6,11 +6,13 @@ import cv2
 import os
 import time
 
+output_size = (224, 224)
+file_extension = ".mov"
+
 for i in range(1, 24):
     start_time = time.time()
 
     path = f"./data/advio-{i:02}/iphone/"
-    file_extension = ".mov"
     filename = path + "frames" + file_extension
 
     if not os.path.exists(path + "frames/"):
@@ -26,8 +28,6 @@ for i in range(1, 24):
   \t{fps} fps
   \t{frame_count} frames\n"""
     )
-
-    output_size = (224, 224)
 
     if vid.isOpened():
         for i in range(frame_count):
