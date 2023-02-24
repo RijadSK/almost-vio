@@ -4,7 +4,6 @@ and the timestap of the ADVIO dataset (download link present in README.md).
 """
 import pandas as pd
 import numpy as np
-import os
 from tqdm import tqdm
 from matplotlib.image import imread
 
@@ -94,7 +93,8 @@ def diff_frames(path, scene_name, frames):
 
     amount_samples = frames.shape[0]
 
-    for i in tqdm(range(amount_samples-1)):
+    # -1 for the diff offset and -1 because the frames extractor sometimes miss the last frame so -2
+    for i in tqdm(range(amount_samples-2)):
         frame = imread(path + f"{frames[i]}.jpg")
         next_frame = imread(path + f"{frames[i+1]}.jpg")
 
@@ -104,18 +104,19 @@ def diff_frames(path, scene_name, frames):
 
 
 buffer_size=100
-
+scenes = [8, 9, 10, 13, 15, 16, 17, 19]
 # run preparation on specific scenes
-for i in [8, 9, 10, 13, 15, 16, 17, 19]:
+for i in scenes:
     scene_name = f"advio-{i:02}"
-    print(f"*** PREPARING SCENE {scene_name} ***")
+    print(f"\n\n*** PREPARING SCENE {scene_name} ***")
 
-    path = f"./data/{scene_name}/iphone/"
-    in_frames = path + "frames.csv"
-    in_inertials = path + "accelerometer.csv"
-    in_labels = "./data/advio-01/ground-truth/pose.csv"
+    path = f"./data/{scene_name}/"
+    path_iphone = path + "iphone/"
+    in_frames = path_iphone + "frames.csv"
+    in_inertials = path_iphone + "accelerometer.csv"
+    in_labels = path + "ground-truth/pose.csv"
 
-    out_synced = path + "frames_synced.csv"
+    out_synced = path_iphone + "frames_synced.csv"
 
     df_frames = pd.read_csv(in_frames, header=None)
     df_inertial = pd.read_csv(in_inertials, header=None)
@@ -128,7 +129,6 @@ for i in [8, 9, 10, 13, 15, 16, 17, 19]:
     print(f"\nResampling")
     tsr = resampling(ts, 50)
     print(f"Done - {tsr.shape}")
-    del ts
 
     # selecting the frames that matches timestamp
     frames = df_frames.iloc[:, 1].to_numpy()
@@ -136,39 +136,42 @@ for i in [8, 9, 10, 13, 15, 16, 17, 19]:
 
     # diff frames
     print(f"\nDiffing frames")
-    diff_frames(path, scene_name, frames)
-    print(f"Done")
+    diff_frames(path_iphone, scene_name, frames)
 
     # since diff consider a subset of frames, i have to crop the others to match shapes
-    frames = frames[1:]
-    tsr = tsr[1:]
+    # -1 becuase the frames extractor sometimes miss the last frame so -2
+    frames = frames[1:-1]
+    tsr = tsr[1:-1]
 
     # building labels
     print(f"\nBuilding labels")
     labels = sync_poses(tsr, df_label)
-    print(f"Done")
 
     # extracting accellerometer data
     print(f"\nExtracting inertial data")
     inertials = extract_inertial_data(tsr, df_inertial)
-    print(f"Done")
 
     # packing buffer
     print("\nBuilding buffer inertials")
     full_inertials = pack_buffer(inertials, buffer_size)
-    np.save(path + "inertial_buffer.npy", full_inertials)
-    print(f"Done - {full_inertials.shape}")
+    np.save(path_iphone + "inertial_buffer.npy", full_inertials)
 
     # since buffer consider a subset of data, i have to crop the others to match shapes
+    frames = frames[buffer_size:]
+    tsr = tsr[buffer_size:]
     labels = labels[buffer_size:]
     inertials = inertials[buffer_size:]
 
-    np.save(path + "labels.npy", labels)
-    np.save(path + "inertials.npy", inertials)
+    # check that every data source has the same amout of samples
+    assert full_inertials.shape[0] == frames.shape[0] == tsr.shape[0] == labels.shape[0] == inertials.shape[0]
+
+    np.save(path_iphone + "labels.npy", labels)
+    np.save(path_iphone + "inertials.npy", inertials)
 
     del full_inertials
     del inertials
     del labels
+    
 
     # saving
     frame_names = np.array([f"{scene_name}_{f}.jpg" for f in frames])
@@ -179,6 +182,7 @@ for i in [8, 9, 10, 13, 15, 16, 17, 19]:
     del data
     del frame_names
     del tsr
+    del ts
     del df
 
-print("\nCompleted!")
+print("\n*** Completed! ***")
