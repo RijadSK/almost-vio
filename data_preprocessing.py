@@ -5,24 +5,23 @@ and the timestap of the ADVIO dataset (download link present in README.md).
 import pandas as pd
 import numpy as np
 import os
-import shutil
 from tqdm import tqdm
 from matplotlib.image import imread
 
 
-def resampling(sample: np.ndarray, frq_new: int) -> np.ndarray:
+def resampling(ts_samples: np.ndarray, frq_new: int) -> np.ndarray:
     time_unit = 1 / frq_new
     resampled = []
     old_time = 0
     current_time = old_time + time_unit
 
-    for idx, s in enumerate(sample):
-        if current_time < s and idx != 0:
+    for idx, ts in enumerate(ts_samples):
+        if current_time < ts and idx != 0:
             # memorizing the closest frame between the previous or the next
-            if abs(sample[idx - 1] - current_time) < abs(sample[idx] - current_time):
-                resampled.append(sample[idx - 1])
+            if abs(ts_samples[idx - 1] - current_time) < abs(ts_samples[idx] - current_time):
+                resampled.append(ts_samples[idx - 1])
             else:
-                resampled.append(sample[idx])
+                resampled.append(ts_samples[idx])
 
             current_time += time_unit
 
@@ -92,9 +91,6 @@ df_label = pd.read_csv(in_labels, header=None)
 
 list_dir = os.listdir(path_frames)
 list_dir = np.array(list_dir)
-
-
-print("Set up...")
 
 # timestamps at 60Hz
 ts = df_frames.iloc[:, 0].to_numpy()
