@@ -28,18 +28,19 @@ def resampling(ts_samples: np.ndarray, frq_new: int) -> np.ndarray:
     return np.array(resampled)
 
 
-def extract_inertial_data(sample, df):
+def extract_inertial_data(ts_samples, df):
+    
+    if not os.path.exists(out_inertials):
+        os.mkdir(out_inertials)
+
     times_inertials = df.iloc[:, 0].to_numpy()
     inertials = df.iloc[:, 1:].to_numpy()
+    amount_samples = ts_samples.shape[0]
+    inertial_data = np.zeros((amount_samples, 2, 3))
 
-    if not os.path.exists(path + "inertials/"):
-        os.mkdir(path + "inertials/")
-
-    inertial_data = np.zeros((sample[100:].shape[0], 2, 3))
-
-    for sidx, s in enumerate(tqdm(sample[100:])):
+    for sidx, ts in enumerate(tqdm(ts_samples)):
         for idx, t in enumerate(times_inertials):
-            if t > s and idx != 0:
+            if t > ts and idx != 0:
                 # store 2 inertial datapoints for each sample
                 couple_inertials = np.stack(
                     [
@@ -53,21 +54,23 @@ def extract_inertial_data(sample, df):
     return inertial_data
 
 
-def sync_poses(sample, df):
+def sync_poses(ts_samples, df):
 
-    if not os.path.exists(path + "labels/"):
-        os.mkdir(path + "labels/")
+    if not os.path.exists(out_labels):
+        os.mkdir(out_labels)
 
-    labels = np.zeros((sample.shape[0], 2, 3))
+    ts_poses = df.iloc[:, 0]
+    amount_samples = ts_samples.shape[0]
+    labels = np.zeros((amount_samples, 2, 3))
 
-    for sidx, s in enumerate(tqdm(sample)):
-        for pose_idx, pose in enumerate(df.iloc[:, 0]):
-            if pose > s and pose_idx != 0:
+    for sidx, ts in enumerate(tqdm(ts_samples)):
+        for pidx, ts_pose in enumerate(ts_poses):
+            if ts_pose > ts and pidx != 0:
                 # store 2 pose datapoints for each sample
                 couple_truth = np.stack(
                     [
-                        df.iloc[pose_idx - 1, 1:4].to_numpy(),
-                        df.iloc[pose_idx, 1:4].to_numpy(),
+                        df.iloc[pidx - 1, 1:4].to_numpy(),
+                        df.iloc[pidx, 1:4].to_numpy(),
                     ]
                 )
                 labels[sidx, :, :] = couple_truth
@@ -75,22 +78,25 @@ def sync_poses(sample, df):
 
     return labels
 
+def normalize(data):
+    data = data - data.min()
+    data = data / data.max()
+    return data
 
+buffer_size=100
 path = "./data/advio-01/iphone/"
-in_frames = "./data/advio-01/iphone/frames.csv"
-in_accellerometer = "./data/advio-01/iphone/accelerometer.csv"
+in_frames = path + "frames.csv"
+in_inertials = path + "accelerometer.csv"
 in_labels = "./data/advio-01/ground-truth/pose.csv"
 
-output_file = "./data/advio-01/iphone/frames_synced.csv"
-path_frames = "./data/advio-01/iphone/frames"
-
+out_synced = path + "frames_synced.csv"
+out_frames = path + "frames"
+out_inertials = path + "inertials"
+out_labels = path + "labels"
 
 df_frames = pd.read_csv(in_frames, header=None)
-df_inertial = pd.read_csv(in_accellerometer, header=None)
+df_inertial = pd.read_csv(in_inertials, header=None)
 df_label = pd.read_csv(in_labels, header=None)
-
-list_dir = os.listdir(path_frames)
-list_dir = np.array(list_dir)
 
 # timestamps at 60Hz
 ts = df_frames.iloc[:, 0].to_numpy()
@@ -99,11 +105,6 @@ ts = df_frames.iloc[:, 0].to_numpy()
 print(f"\nResampling")
 tsr = resampling(ts, 50)
 print(f"Done - {tsr.shape}")
-
-# selecting the frames that matches timestamp
-frames = df_frames.iloc[:, 1].to_numpy()
-frames = frames[np.where(np.isin(ts, tsr))]
-frame_names = np.array([f"{f}.jpg" for f in frames])
 
 # extracting accellerometer data
 print(f"\nExtracting inertial data")
@@ -119,34 +120,10 @@ np.save(path + "labels.npy", labels)
 del labels
 print(f"Done")
 
-data = np.stack([tsr, frame_names])
-df = pd.DataFrame(
-    data.T,
-)
-
-""" for idx, ts in enumerate(tsr):
-    ts = df.iloc[idx,0]
-    frame_name = df.iloc[idx,1]
-
-    frames_path = path + "frames/"
-    current_path = frames_path + f"{ts}/"
-    print(current_path)
-    os.mkdir(current_path)
-    shutil.move(frames_path + frame_name, current_path + frame_name) """
-
-# saving df
-df.to_csv(output_file, index=False, header=False)
-
 # PACKING DATA AS TENSORS
 
 
-def normalize(data):
-    data = data - data.min()
-    data = data / data.max()
-    return data
-
-
-# image packing
+""" # image packing
 path = "./data/advio-01/iphone/frames/"
 df = pd.read_csv("./data/advio-01/iphone/frames_synced.csv", header=None)
 files = df.iloc[100:, 1].to_numpy()
@@ -162,7 +139,7 @@ for idx, file in enumerate(files):
 
 np.save("./data/advio-01/iphone/frames.npy", full_frames)
 print(full_frames.shape)
-print("Done")
+print("Done") """
 
 # packing buffer
 print("\nPacking inertials")
@@ -187,5 +164,17 @@ for idx in tqdm(range(100, files.shape[0])):
 np.save("./data/advio-01/iphone/inertial_buffer.npy", full_inertials)
 print(full_inertials.shape)
 print("Done")
+
+# selecting the frames that matches timestamp and saving
+frames = df_frames.iloc[:, 1].to_numpy()
+frames = frames[np.where(np.isin(ts, tsr))]
+frame_names = np.array([f"{f}.jpg" for f in frames])
+ 
+data = np.stack([tsr, frame_names])
+df = pd.DataFrame(data.T, index=False, header=False)
+print("pandas header/index correctness check")
+print(data[:5])
+print(df[:5])
+df.to_csv(out_synced, index=False, header=False)
 
 print("\nCompleted!")
