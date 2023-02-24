@@ -80,7 +80,7 @@ def pack_buffer(inertials, buffer_size):
     full_inertials = np.zeros((amount_samples - buffer_size, buffer_size, 2, 3)).astype(np.float32)
 
     for idx in tqdm(range(buffer_size, amount_samples)):
-        full_inertials[idx - buffer_size] = inertials[:buffer_size]
+        full_inertials[idx - buffer_size] = inertials[idx - buffer_size : idx]
 
     return full_inertials
 
@@ -88,6 +88,20 @@ def normalize(data):
     data = data - data.min()
     data = data / data.max()
     return data
+
+def diff_frames(path, scene_name, frames):
+    path = path + "frames/"
+
+    amount_samples = frames.shape[0]
+
+    for i in range(amount_samples-1):
+        frame = imread(path + f"{frames[i]}.jpg")
+        next_frame = imread(path + f"{frames[i+1]}.jpg")
+
+        diff = next_frame - frame
+        diff = np.moveaxis(diff, -1, 0) # (channels, heigth, width)
+        np.save(path + f"{scene_name}_{i+1}", diff)
+
 
 buffer_size=100
 scene_name = "advio-01"
@@ -97,7 +111,6 @@ in_inertials = path + "accelerometer.csv"
 in_labels = "./data/advio-01/ground-truth/pose.csv"
 
 out_synced = path + "frames_synced.csv"
-out_frames = path + "frames"
 
 df_frames = pd.read_csv(in_frames, header=None)
 df_inertial = pd.read_csv(in_inertials, header=None)
@@ -111,18 +124,27 @@ print(f"\nResampling")
 tsr = resampling(ts, 50)
 print(f"Done - {tsr.shape}")
 
-""" # building labels
+# selecting the frames that matches timestamp
+frames = df_frames.iloc[:, 1].to_numpy()
+frames = frames[np.where(np.isin(ts, tsr))]
+
+# diff frames
 print(f"\nBuilding labels")
-labels = sync_poses(tsr, df_label)
-np.save(path + "labels.npy", labels)
+diff_frames(path, scene_name, frames)
 print(f"Done")
 
-del labels """
+# since diff consider a subset of frames, i have to crop the others to match shapes
+frames = frames[1:]
+tsr = tsr[1:]
+
+# building labels
+print(f"\nBuilding labels")
+labels = sync_poses(tsr, df_label)
+print(f"Done")
 
 # extracting accellerometer data
 print(f"\nExtracting inertial data")
 inertials = extract_inertial_data(tsr, df_inertial)
-np.save(path + "inertials.npy", inertials)
 print(f"Done")
 
 # packing buffer
@@ -131,32 +153,19 @@ full_inertials = pack_buffer(inertials, buffer_size)
 np.save(path + "inertial_buffer.npy", full_inertials)
 print(f"Done - {full_inertials.shape}")
 
+# since buffer consider a subset of data, i have to crop the others to match shapes
+labels = labels[buffer_size:]
+inertials = inertials[buffer_size:]
+
+np.save(path + "labels.npy", labels)
+np.save(path + "inertials.npy", inertials)
+
 del full_inertials
 del inertials
+del labels
 
-# image packing
-""" path = "./data/advio-01/iphone/frames/"
-df = pd.read_csv("./data/advio-01/iphone/frames_synced.csv", header=None)
-files = df.iloc[100:, 1].to_numpy()
-full_frames = np.zeros((13002 - 100, 224, 224, 3)).astype(np.float32)
-
-for idx, file in enumerate(files):
-    frame = imread(path + file)
-    frame = normalize(frame)
-    frame = frame.astype(np.float32)
-
-    full_frames[idx, :, :, :] = frame
-    del frame
-
-np.save("./data/advio-01/iphone/frames.npy", full_frames)
-print(full_frames.shape)
-print("Done") """
-
-# selecting the frames that matches timestamp and saving
-frames = df_frames.iloc[:, 1].to_numpy()
-frames = frames[np.where(np.isin(ts, tsr))]
+# saving
 frame_names = np.array([f"{scene_name}_{f}.jpg" for f in frames])
- 
 data = np.stack([tsr, frame_names])
 df = pd.DataFrame(data.T)
 df.to_csv(out_synced, index=False, header=False)
