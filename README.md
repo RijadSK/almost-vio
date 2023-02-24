@@ -53,3 +53,4 @@ The dataset can be found at: https://github.com/AaltoVision/ADVIO
 - https://www.alaakhamis.org/teaching/SPC418/reading/Visual%20odometry.pdf
 - https://arxiv.org/pdf/1906.03289.pdf
 - https://arxiv.org/pdf/1906.11435.pdf
+- https://senwang.gitlab.io/DeepVO/files/wang2017DeepVO.pdf
