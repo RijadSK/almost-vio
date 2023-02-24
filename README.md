@@ -51,3 +51,5 @@ The dataset can be found at: https://github.com/AaltoVision/ADVIO
 
 - http://mrsl.grasp.upenn.edu/loiannog/tutorial_ICRA2016/VO_Tutorial.pdf
 - https://www.alaakhamis.org/teaching/SPC418/reading/Visual%20odometry.pdf
+- https://arxiv.org/pdf/1906.03289.pdf
+- https://arxiv.org/pdf/1906.11435.pdf
