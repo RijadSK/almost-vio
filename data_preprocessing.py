@@ -40,7 +40,7 @@ def extract_inertial_data(ts_samples, df):
 
     for sidx, ts in enumerate(tqdm(ts_samples)):
         for idx, t in enumerate(times_inertials):
-            if t > ts and idx != 0:
+            if t > ts and idx != 0 and inertials[idx-1] < ts:
                 # store 2 inertial datapoints for each sample
                 couple_inertials = np.stack(
                     [
@@ -50,6 +50,8 @@ def extract_inertial_data(ts_samples, df):
                 )
                 inertial_data[sidx, :, :] = couple_inertials
                 break
+            else:
+                raise Exception("timestamp not syncend correctly synced with INERTIALS")
 
     return inertial_data
 
@@ -65,7 +67,7 @@ def sync_poses(ts_samples, df):
 
     for sidx, ts in enumerate(tqdm(ts_samples)):
         for pidx, ts_pose in enumerate(ts_poses):
-            if ts_pose > ts and pidx != 0:
+            if ts_pose > ts and pidx != 0 and ts_poses[pidx-1] < ts:
                 # store 2 pose datapoints for each sample
                 couple_truth = np.stack(
                     [
@@ -75,6 +77,8 @@ def sync_poses(ts_samples, df):
                 )
                 labels[sidx, :, :] = couple_truth
                 break
+            else:
+                raise Exception("timestamp not syncend correctly synced with POSE LABELS")
 
     return labels
 
