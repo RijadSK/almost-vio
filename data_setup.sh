@@ -32,3 +32,7 @@ python ../video_to_frames.py
 # Preparing the data for the training
 echo -e "\n\n${GREEN}PREPARING THE DATA${NC}"
 python ../data_preprocessing.py
+
+# Packing the data for the training
+echo -e "\n\n${GREEN}PACKING THE DATA${NC}"
+python ../packing_dataset.py
