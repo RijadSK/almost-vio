@@ -94,13 +94,13 @@ def diff_frames(path, scene_name, frames):
     amount_samples = frames.shape[0]
 
     # -1 for the diff offset and -1 because the frames extractor sometimes miss the last frame so -2
-    for i in tqdm(range(amount_samples-2)):
+    for i in tqdm(range(amount_samples-1)):
         frame = imread(path + f"{frames[i]}.jpg")
         next_frame = imread(path + f"{frames[i+1]}.jpg")
 
         diff = next_frame - frame
         diff = np.moveaxis(diff, -1, 0) # (channels, heigth, width)
-        np.save(path + f"{scene_name}_{i+1}", diff)
+        np.save(path + f"{scene_name}_{frames[i+1]}", diff)
 
 
 buffer_size=100
@@ -134,15 +134,6 @@ for i in scenes:
     frames = df_frames.iloc[:, 1].to_numpy()
     frames = frames[np.where(np.isin(ts, tsr))]
 
-    # diff frames
-    print(f"\nDiffing frames")
-    diff_frames(path_iphone, scene_name, frames)
-
-    # since diff consider a subset of frames, i have to crop the others to match shapes
-    # -1 becuase the frames extractor sometimes miss the last frame so -2
-    frames = frames[1:-1]
-    tsr = tsr[1:-1]
-
     # building labels
     print(f"\nBuilding labels")
     labels = sync_poses(tsr, df_label)
@@ -154,19 +145,38 @@ for i in scenes:
     # packing buffer
     print("\nBuilding buffer inertials")
     full_inertials = pack_buffer(inertials, buffer_size)
-    np.save(path_iphone + "inertial_buffer.npy", full_inertials)
-
+    
     # since buffer consider a subset of data, i have to crop the others to match shapes
     frames = frames[buffer_size:]
     tsr = tsr[buffer_size:]
     labels = labels[buffer_size:]
     inertials = inertials[buffer_size:]
 
+    # -1 becuase the frames extractor sometimes miss the last frame
+    frames = frames[:-1]
+    tsr = tsr[:-1]
+    labels = labels[:-1]
+    inertials = inertials[:-1]
+    full_inertials = full_inertials[:-1]
+
+    # diff frames
+    print(f"\nDiffing frames")
+    diff_frames(path_iphone, scene_name, frames)
+
+    # since diff consider a subset of frames, i have to crop the others to match shapes
+    frames = frames[1:]
+    tsr = tsr[1:]
+    labels = labels[1:]
+    inertials = inertials[1:]
+    full_inertials = full_inertials[1:]
+
+
     # check that every data source has the same amout of samples
     assert full_inertials.shape[0] == frames.shape[0] == tsr.shape[0] == labels.shape[0] == inertials.shape[0]
 
     np.save(path_iphone + "labels.npy", labels)
     np.save(path_iphone + "inertials.npy", inertials)
+    np.save(path_iphone + "inertial_buffer.npy", full_inertials)
 
     del full_inertials
     del inertials
