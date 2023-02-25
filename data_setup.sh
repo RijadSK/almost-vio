@@ -13,26 +13,28 @@ NC='\033[0m' # No Color
 
 # Downlad all 23 scenes of ADVIO dataset
 echo -e "\n\n${GREEN}DOWNLOADING THE DATASET${NC}"
-for i in $(seq -f "%02g" 1 23);
-do
-    # Download
-    wget -O advio-$i.zip https://zenodo.org/record/1476931/files/advio-$i.zip
+# for i in $(seq -f "%02g" 1 23);
+# do
+#     # Download
+#     wget -O advio-$i.zip https://zenodo.org/record/1476931/files/advio-$i.zip
 
-    # Extract
-    7z x advio-$i.zip
+#     # Extract
+#     7z x advio-$i.zip
 
-    # Cleaning
-    rm advio-$i.zip
-done
+#     # Cleaning
+#     rm advio-$i.zip
+# done
+
+cd ..
 
 # Extracting frames from video scenes
 echo -e "\n\n${GREEN}EXTRACTING FRAMES FROM VIDEOS${NC}"
-python ../video_to_frames.py
+python ./video_to_frames.py
 
 # Preparing the data for the training
 echo -e "\n\n${GREEN}PREPARING THE DATA${NC}"
-python ../data_preprocessing.py
+python ./data_preprocessing.py
 
 # Packing the data for the training
 echo -e "\n\n${GREEN}PACKING THE DATA${NC}"
-python ../packing_dataset.py
+python ./packing_dataset.py
