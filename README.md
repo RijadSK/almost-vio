@@ -52,7 +52,7 @@ The dataset can be found at: https://github.com/AaltoVision/ADVIO
 
 ### Data setup
 
-The script **data_setup.sh** handles the data download extraction, preparation for the training. It may take some hours.
+The script **data_setup.sh** handles the data download, extraction and preparation for the training. It may take some hours.
 
 ## Requirements :warning:
 
