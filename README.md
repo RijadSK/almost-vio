@@ -56,7 +56,7 @@ The script **data_setup.sh** handles the data download extraction, preparation f
 
 ## Requirements :warning:
 
-Make sure to install all the requirements present in requirements.txt in your python enviroment.
+Make sure to install all the requirements in your python enviroment.
 
 ## Reference
 
