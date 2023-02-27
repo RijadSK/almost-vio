@@ -1,6 +1,5 @@
 /.vscode
 /data
 /autoencoder_rmse.ipynb
-/experiments
 *.npy
 *.npz
