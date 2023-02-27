@@ -1,8 +1,15 @@
 # Almost-VIO
 
-Computer vision project about visual odometry
+## Abstract
 
-# Pipeline
+The estimation task of visual odometry (VO) suffers from approximation errors.
+We address some of them by training a model to understand long term knowledge about physics by predicting sequence of inertial data.
+This approach forces the model to consider both the short term (frames) and long term (inertial sequence) knowledge during the motion estimation.
+We found out that our solution enhance the common VO models at inference time, without requiring any additional data in input.
+
+## Models
+
+- **inertial_net_train.ipynb**: execute the training of our solution. Our pipeline is designed as follow
 
 ```mermaid
 graph TD;
@@ -20,34 +27,38 @@ graph TD;
     style Conv2d_Intertial fill:#FF9966;
 ```
 
-# Dataset
+- **baseline_net_train.ipynb**: execute the training of the baseline. The baseline is just a MobileNetV3 that extract feature from frames and tries to predict the odometry values without any refinement steps.
+
+## Dataset
+
 We decided to use the ADVIO dataset because it provides 23 walking scenes with variable occlusion and a lot of sensory recordings.
 Among them it provides video, accellerometer, and ground truth for each timestep, that are necessary for our task.
 Moreover the data are captured from commodity but modern devices, which makes a suitable dataset for real world scenario model trainig.
 
 The dataset can be found at: https://github.com/AaltoVision/ADVIO
 
-## Preprocessing
+### Preprocessing
 
 1. Resample of the 60Hz video frames to 50Hz in order to have exactly 2 intertial data (since are sampled at 100Hz) for each frame.
    Each timestamp in the 50Hz sampling is associated with the frame of the closest timestamp of the 60Hz samplig.
 
-2. Sync the timestamp on the accellerometer, video frames and ground truth files. 
+2. Sync the timestamp on the accellerometer, video frames and ground truth files.
 
 3. The y and z of the accellerometer were corrected from m/s^2 to g's in order to match the unit measure of the x-axis
 
 4. The frames are then resized (from 1280x720 to 224x224) and normalized.
 
-5. Building a 2 sec buffer of inertials data. 
+5. Building a 2 sec buffer of inertials data.
 
+### Data setup
 
-## Utils
+The script **data_setup.sh** handles the data download extraction, preparation for the training. It may take some hours.
 
-- **video_to_frame.py**: it extracts the frames from the video in order to prepare the data
-- **data_setup.py**: it does all the preprocessing on the data. 
-(Warning: It may take **12 hours**)
+## Requirements :warning:
 
-# Reference
+Make sure to install all the requirements present in requirements.txt in your python enviroment.
+
+## Reference
 
 - http://mrsl.grasp.upenn.edu/loiannog/tutorial_ICRA2016/VO_Tutorial.pdf
 - https://www.alaakhamis.org/teaching/SPC418/reading/Visual%20odometry.pdf
