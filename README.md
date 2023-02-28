@@ -1,5 +1,7 @@
 # Almost-VIO
 
+The co-authors were all the contributors.
+
 ## Abstract
 
 The estimation task of visual odometry (VO) suffers from approximation errors.
