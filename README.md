@@ -5,6 +5,9 @@
 The estimation task of visual odometry (VO) suffers from approximation errors.
 We address some of them by training a model to understand long term knowledge about physics by predicting sequence of inertial data.
 This approach forces the model to consider both the short term (frames) and long term (inertial sequence) knowledge during the motion estimation.
+
+During the training phase this sequence comes directly from the dataset, meanwhile in the testing phase it’s **self-generated** by the model.
+
 We found out that our solution enhance the common VO models at inference time, without requiring any additional data in input.
 
 ## Models
