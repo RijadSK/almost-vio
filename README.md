@@ -10,28 +10,6 @@ During the training phase this sequence comes directly from the dataset, meanwhi
 
 We found out that our solution enhance the common VO models at inference time, without requiring any additional data in input.
 
-## Models
-
-- **inertial_net_train.ipynb**: execute the training of our solution. Our pipeline is designed as follow
-
-```mermaid
-graph TD;
-    Images-->Conv2d_Odometry;
-    Images-->Conv2d_Intertial;
-    Conv2d_Odometry-->Dense_Odometry;
-    Conv2d_Intertial-->Conv1d_Inertial;
-    Inertial_Sequence-->Conv1d_Inertial;
-    Conv1d_Inertial-->Dense_Odometry;
-    Dense_Odometry-->Odometry;
-
-    style Conv2d_Odometry fill:#FF9966;
-    style Conv1d_Inertial fill:#FF9966;
-    style Dense_Odometry fill:#FF9966;
-    style Conv2d_Intertial fill:#FF9966;
-```
-
-- **baseline_net_train.ipynb**: execute the training of the baseline. The baseline is just a MobileNetV3 that extract feature from frames and tries to predict the odometry values without any refinement steps.
-
 ## Dataset
 
 We decided to use the ADVIO dataset because it provides 23 walking scenes with variable occlusion and a lot of sensory recordings.
@@ -57,9 +35,38 @@ The dataset can be found at: https://github.com/AaltoVision/ADVIO
 
 The script **data_setup.sh** handles the data download, extraction and preparation for the training. It may take some hours.
 
-## Requirements :warning:
+:warning: Make sure to install all the requirements in your python enviroment before starting the script.
 
-Make sure to install all the requirements in your python enviroment.
+## Models
+
+- **inertial_net_train.ipynb**: execute the training of our solution. Our pipeline is designed as follow
+
+```mermaid
+graph TD;
+    Images-->Conv2d_Odometry;
+    Images-->Conv2d_Intertial;
+    Conv2d_Odometry-->Dense_Odometry;
+    Conv2d_Intertial-->Conv1d_Inertial;
+    Inertial_Sequence-->Conv1d_Inertial;
+    Conv1d_Inertial-->Dense_Odometry;
+    Dense_Odometry-->Odometry;
+
+    style Conv2d_Odometry fill:#FF9966;
+    style Conv1d_Inertial fill:#FF9966;
+    style Dense_Odometry fill:#FF9966;
+    style Conv2d_Intertial fill:#FF9966;
+```
+
+- **baseline_net_train.ipynb**: execute the training of the baseline. The baseline is just a MobileNetV3 that extract feature from frames and tries to predict the odometry values without any refinement steps.
+
+## Results
+
+We verified that our solution can successfully reduce the RMSE error with respect to the baseline.
+
+| Solution         | Stopping epoch | Validation Loss (RMSE) |
+| ---------------- | -------------- | ---------------------- |
+| Baseline         | 191            | 1.64                   |
+| **Our solution** | 215            | **1.45**               |
 
 ## Reference
 
