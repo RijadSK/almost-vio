@@ -5,7 +5,7 @@ The co-authors were all the contributors.
 Almost-VIO (Visual Inertial Odometry) was developed as part of a course project of the exam Computer Vision and Cognitive Systems, University of Modena and Reggio Emilia, Italy.
 
 <p align="center" width="100%" >
-<a href="https://www.canva.com/design/DAFbe2Q-lnM/16_8u-8XbA2YiuHMuSqYeQ/view?utm_content=DAFbe2Q-lnM&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink">:bar_chart: Here the slides of the presentation :bar_chart:</a>
+   <a href="https://drive.google.com/file/d/1xn-38CwVeGbgD-Cz1OWMRfmDSSfe7dEY/view?usp=sharing">Latex Report :page_facing_up:</a> <a href="https://www.canva.com/design/DAFbe2Q-lnM/16_8u-8XbA2YiuHMuSqYeQ/view?utm_content=DAFbe2Q-lnM&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink">Slides of the presentation :bar_chart:</a>
 </p>
 
 ## Abstract
