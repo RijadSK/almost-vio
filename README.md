@@ -69,7 +69,7 @@ graph TD;
 
 ## Results
 
-We verified that our solution can successfully reduce the RMSE error with respect to the baseline.
+We verified that our solution, i.e. adding an inertial branch to a baseline odometry backbone, can successfully regularize the training thus improving the early stopping and reducing the RMSE error. 
 
 | Solution         | Stopping epoch | Validation Loss (RMSE) |
 | ---------------- | -------------- | ---------------------- |
